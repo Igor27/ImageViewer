@@ -1,0 +1,136 @@
+﻿<Window x:Class="ImageViewer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:interactivity="http://prismlibrary.com/"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ImageViewer"
+        xmlns:viewModels="clr-namespace:ImageViewer.ViewModels"
+        xmlns:helpers="clr-namespace:ImageViewer.Helpers"
+        mc:Ignorable="d"
+        Title="MainWindow" MinHeight="600" MinWidth="600"
+        FontFamily="Segoe UI Light">
+    <Window.Resources>
+        <DataTemplate x:Key="ImageItemTemplate">
+            <Button d:DataContext="{d:DesignInstance {x:Type viewModels:ImagesListItemViewModel}}"
+                    Visibility="{Binding Path=ImageVisibility}"
+                    Background="Transparent" Width="{Binding ImageWidth}" Height="{Binding ImageHeight}" BorderThickness="0">
+                <Image Stretch="Uniform" Source="{Binding Path}"/>
+                <Button.InputBindings>
+                    <KeyBinding Command="{Binding DecreaseImageCommand}" Key="Escape"/>
+                </Button.InputBindings>
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type Button}">
+                                    <Grid Background="{TemplateBinding Background}">
+                                        <ContentPresenter Content="{TemplateBinding Content}"
+                                                          HorizontalAlignment="Center" 
+                                                          VerticalAlignment="Center"
+                                                          Margin="5"/>
+                                    </Grid>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Style>
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <interactivity:InvokeCommandAction  Command="{Binding MouseDoubleClickCommand}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Button>
+        </DataTemplate>
+        <Style x:Key="ButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="130"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Chocolate"/>
+            <Setter Property="Foreground" Value="Bisque"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="5">
+                            <ContentPresenter Content="{TemplateBinding Content}"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Center"
+                                              Margin="8,2"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <Grid Background="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
+              VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Label x:Name="DragDropPanelLabel" Grid.Column="0"
+                   Content="Drag and Drop image/s here"
+                   HorizontalContentAlignment="Center" VerticalContentAlignment="Center" 
+                   Visibility="{Binding DropPanelLabelVisibility}"
+                   Background="Transparent" Foreground="AliceBlue" FontSize="36" />
+
+            <ItemsControl x:Name="ListOfImages" Grid.Column="0"
+                          VerticalAlignment="Stretch"
+                          HorizontalAlignment="Stretch"
+                          ItemTemplate="{StaticResource ImageItemTemplate}"
+                          ItemsSource="{Binding ImageCollection, ValidatesOnDataErrors=True}"
+                          Background="Transparent"
+                          AllowDrop="{Binding IsDropAllowed, Mode=TwoWay}"
+                          helpers:ActualSizeObserver.Width="{Binding ElementName=ListOfImages, Path=ActualWidth, Mode=OneWay}"
+                          helpers:ActualSizeObserver.Height="{Binding ElementName=ListOfImages, Path=ActualHeight, Mode=OneWay}">
+
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel IsItemsHost="True" Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Drop">
+                        <interactivity:InvokeCommandAction Command="{Binding DropImageCommand}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+
+            </ItemsControl>
+
+            <Grid Grid.Column="1" Visibility="{Binding Path=ButtonsVisibility}"
+                  VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="10"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Button Grid.Row="0" Grid.Column="1" Style="{StaticResource ButtonStyle}" Content="Previous Image"
+                        Command="{Binding ShowPreviousImageCommand}" VerticalAlignment="Bottom">
+                    <Button.InputBindings>
+                        <KeyBinding Command="{Binding ShowPreviousImageCommand}" Key="Up"/>
+                    </Button.InputBindings>
+                </Button>
+                <Button Grid.Row="2" Grid.Column="1" Style="{StaticResource ButtonStyle}" Content="Next Image" 
+                        Command="{Binding ShowNextImageCommand}" VerticalAlignment="Top">
+                    <Button.InputBindings>
+                        <KeyBinding Command="{Binding ShowPreviousImageCommand}" Key="Down"/>
+                    </Button.InputBindings>
+                </Button>
+            </Grid>
+
+        </Grid>
+    </ScrollViewer>
+
+</Window>
